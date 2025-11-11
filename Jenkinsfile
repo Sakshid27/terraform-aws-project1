@@ -3,9 +3,9 @@ pipeline {
 
     environment {
         // Use Jenkins credentials (type: AWS Credentials)
-        AWS_ACCESS_KEY_ID     = credentials('aws-access-key-id')
-        AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key')
-        TF_WORKING_DIR = './'  // Folder with Terraform files
+        AWS_ACCESS_KEY_ID     = credentials('aws-creds')
+        AWS_SECRET_ACCESS_KEY = credentials('aws-creds')
+        TF_WORKING_DIR = './'
     }
 
     parameters {
