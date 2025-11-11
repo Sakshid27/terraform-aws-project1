@@ -5,6 +5,9 @@ pipeline {
         // Use Jenkins credentials (type: AWS Credentials)
         AWS_ACCESS_KEY_ID     = credentials('aws-creds')
         AWS_SECRET_ACCESS_KEY = credentials('aws-creds')
+
+        // Terraform path on your local system
+        TF_PATH = 'C:\\Users\\saksh\\Downloads\\terraform_1.10.5_windows_386\\terraform.exe'
         TF_WORKING_DIR = './'
     }
 
@@ -24,7 +27,7 @@ pipeline {
             steps {
                 echo 'Initializing Terraform...'
                 dir("${TF_WORKING_DIR}") {
-                    bat 'terraform init'
+                    bat "\"${TF_PATH}\" init"
                 }
             }
         }
@@ -33,7 +36,7 @@ pipeline {
             steps {
                 echo 'Planning Terraform changes...'
                 dir("${TF_WORKING_DIR}") {
-                    bat 'terraform plan -out=tfplan'
+                    bat "\"${TF_PATH}\" plan -out=tfplan"
                 }
             }
         }
@@ -43,7 +46,7 @@ pipeline {
                 input message: 'Approve deployment to AWS?'
                 echo 'Applying Terraform plan...'
                 dir("${TF_WORKING_DIR}") {
-                    bat 'terraform apply -auto-approve tfplan'
+                    bat "\"${TF_PATH}\" apply -auto-approve tfplan"
                 }
             }
         }
@@ -52,7 +55,7 @@ pipeline {
             steps {
                 echo 'Verifying resources on AWS...'
                 dir("${TF_WORKING_DIR}") {
-                    bat 'terraform output'
+                    bat "\"${TF_PATH}\" output"
                 }
             }
         }
@@ -65,7 +68,7 @@ pipeline {
                 input message: 'Destroy resources?'
                 echo 'Destroying Terraform-managed resources...'
                 dir("${TF_WORKING_DIR}") {
-                    bat 'terraform destroy -auto-approve'
+                    bat "\"${TF_PATH}\" destroy -auto-approve"
                 }
             }
         }
