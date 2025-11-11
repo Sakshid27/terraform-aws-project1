@@ -2,29 +2,39 @@ pipeline {
     agent any
 
     environment {
-        AWS_ACCESS_KEY_ID     = credentials('aws-creds')
-        AWS_SECRET_ACCESS_KEY = credentials('aws-creds')
+        // Use Jenkins credentials (type: AWS Credentials)
+        AWS_ACCESS_KEY_ID     = credentials('aws-access-key-id')
+        AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key')
+        TF_WORKING_DIR = './'  // Folder with Terraform files
+    }
+
+    parameters {
+        booleanParam(name: 'DESTROY', defaultValue: false, description: 'Destroy infrastructure after verification?')
     }
 
     stages {
         stage('Checkout Code') {
             steps {
                 echo 'Fetching latest code from GitHub...'
-                checkout scm
+                git branch: 'main', url: 'https://github.com/Sakshid27/terraform-aws-project1.git'
             }
         }
 
         stage('Initialize Terraform') {
             steps {
                 echo 'Initializing Terraform...'
-                bat 'terraform init'
+                dir("${TF_WORKING_DIR}") {
+                    bat 'terraform init'
+                }
             }
         }
 
         stage('Plan Infrastructure') {
             steps {
                 echo 'Planning Terraform changes...'
-                bat 'terraform plan -out=tfplan'
+                dir("${TF_WORKING_DIR}") {
+                    bat 'terraform plan -out=tfplan'
+                }
             }
         }
 
@@ -32,14 +42,18 @@ pipeline {
             steps {
                 input message: 'Approve deployment to AWS?'
                 echo 'Applying Terraform plan...'
-                bat 'terraform apply -auto-approve tfplan'
+                dir("${TF_WORKING_DIR}") {
+                    bat 'terraform apply -auto-approve tfplan'
+                }
             }
         }
 
         stage('Verify Deployment') {
             steps {
                 echo 'Verifying resources on AWS...'
-                bat 'terraform output'
+                dir("${TF_WORKING_DIR}") {
+                    bat 'terraform output'
+                }
             }
         }
 
@@ -50,7 +64,9 @@ pipeline {
             steps {
                 input message: 'Destroy resources?'
                 echo 'Destroying Terraform-managed resources...'
-                bat 'terraform destroy -auto-approve'
+                dir("${TF_WORKING_DIR}") {
+                    bat 'terraform destroy -auto-approve'
+                }
             }
         }
     }
