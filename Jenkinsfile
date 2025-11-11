@@ -32,8 +32,10 @@ pipeline {
         stage('Initialize Terraform') {
             steps {
                 echo 'Initializing Terraform...'
-                dir("${TF_WORKING_DIR}") {
-                    bat "\"${TF_PATH}\" init"
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
+                    dir("${TF_WORKING_DIR}") {
+                        bat "\"${TF_PATH}\" init"
+                    }
                 }
             }
         }
@@ -41,8 +43,10 @@ pipeline {
         stage('Plan Infrastructure') {
             steps {
                 echo 'Planning Terraform changes...'
-                dir("${TF_WORKING_DIR}") {
-                    bat "\"${TF_PATH}\" plan -out=tfplan"
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
+                    dir("${TF_WORKING_DIR}") {
+                        bat "\"${TF_PATH}\" plan -out=tfplan"
+                    }
                 }
             }
         }
@@ -51,8 +55,10 @@ pipeline {
             steps {
                 input message: 'Approve deployment to AWS?'
                 echo 'Applying Terraform plan...'
-                dir("${TF_WORKING_DIR}") {
-                    bat "\"${TF_PATH}\" apply -auto-approve tfplan"
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
+                    dir("${TF_WORKING_DIR}") {
+                        bat "\"${TF_PATH}\" apply -auto-approve tfplan"
+                    }
                 }
             }
         }
@@ -60,8 +66,10 @@ pipeline {
         stage('Verify Deployment') {
             steps {
                 echo 'Verifying deployed resources...'
-                dir("${TF_WORKING_DIR}") {
-                    bat "\"${TF_PATH}\" output"
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
+                    dir("${TF_WORKING_DIR}") {
+                        bat "\"${TF_PATH}\" output"
+                    }
                 }
             }
         }
@@ -73,8 +81,10 @@ pipeline {
             steps {
                 input message: 'Destroy resources?'
                 echo 'Destroying Terraform-managed resources...'
-                dir("${TF_WORKING_DIR}") {
-                    bat "\"${TF_PATH}\" destroy -auto-approve"
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
+                    dir("${TF_WORKING_DIR}") {
+                        bat "\"${TF_PATH}\" destroy -auto-approve"
+                    }
                 }
             }
         }
